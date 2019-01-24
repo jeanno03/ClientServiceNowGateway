@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+//import java.net.InetSocketAddress;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
@@ -13,11 +14,20 @@ import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
+import org.apache.http.HttpHost;
+//import org.springframework.cglib.proxy.Proxy;
+//import org.apache.http.HttpHost;
+//
+//import org.springframework.cglib.proxy.Proxy;
+//import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+//import org.springframework.http.client.SimpleClientHttpRequestFactory;
+//import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+//import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.supercsv.cellprocessor.constraint.NotNull;
@@ -25,10 +35,12 @@ import org.supercsv.cellprocessor.ift.CellProcessor;
 import org.supercsv.io.CsvBeanWriter;
 import org.supercsv.io.ICsvBeanWriter;
 import org.supercsv.prefs.CsvPreference;
+//import org.springframework.cglib.proxy.Proxy;
 
-import drive.natixis.entities.DataParent;
-import drive.natixis.entities.Result;
-import drive.natixis.entities.Data;
+//import natixis.drive.ClientServiceNowGatewayApplication;
+import natixis.drive.entities.DataParent;
+import natixis.drive.entities.Result;
+import natixis.drive.services.MyConstante;
 
 @Service
 public class MyService implements MyServiceInterface{
@@ -36,10 +48,8 @@ public class MyService implements MyServiceInterface{
 	private static Properties prop;
 	private static FileInputStream propFile;
 
-
-
-
 	private static final void loadPropertiesFile() {
+	
 		prop = new Properties();
 		try {
 			propFile = new FileInputStream("C:/Files/FileInputStream.properties");
@@ -55,10 +65,29 @@ public class MyService implements MyServiceInterface{
 		}
 
 	}
+	
+	private  void loadPropertiesFileService() {
+
+		prop = new Properties();
+		try {
+			propFile = new FileInputStream("C:/Files/FileInputStream.properties");
+		} catch (FileNotFoundException ex) {
+
+//			LOGGER.info(ex.getMessage());
+		} 
+		try {
+			prop.load(propFile);
+		} catch (IOException ex) {
+
+//			LOGGER.info(ex.getMessage());
+		}
+
+	}
 
 	private String getPropertyParameter(String para) {
 		loadPropertiesFile();
 		String str = prop.getProperty(para);
+
 		return str;
 	}
 
@@ -68,10 +97,8 @@ public class MyService implements MyServiceInterface{
 
 		String logs = getPropertyParameter("logs");
 		boolean append = true;
-
 		Date day = new Date();
 		SimpleDateFormat formater = null;
-
 		formater = new SimpleDateFormat("ddMMyy");
 
 		try {  
@@ -82,16 +109,19 @@ public class MyService implements MyServiceInterface{
 			SimpleFormatter formatter = new SimpleFormatter();  
 			fh.setFormatter(formatter);  
 
-		} catch (SecurityException e) {  
-			e.printStackTrace();  
-		} catch (IOException e) {  
-			e.printStackTrace();  
+		} catch (SecurityException ex) {  
+			ex.printStackTrace();  
+		} catch (IOException ex) {  
+			ex.printStackTrace();  
 		}  
 
 	}
 
 	@Override
 	public DataParent getDataParentIca() {
+		//test
+//		HttpHost host = new HttpHost("proxybusiness.intranet", 3125, "https");
+		
 		RestTemplate restTemplate = new RestTemplate();
 		String url = getPropertyParameter("url");
 		String username = getPropertyParameter("username");
@@ -102,25 +132,45 @@ public class MyService implements MyServiceInterface{
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		headers.setBasicAuth(username, password);		
 		HttpEntity<String> entity = new HttpEntity<String> ("parameter", headers);
+		
+		
+
+		
+		
+//				props.put("http.proxyHost", "proxybusiness.intranet");
+//				props.put("http.proxyPort", 3125);
+		//test
+//		SimpleClientHttpRequestFactory clientHttpReq = new SimpleClientHttpRequestFactory();
+//		Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("your.proxy.server", 80));
+//		clientHttpReq.setProxy(proxy);
+//		 
+//		restTemplate = new RestTemplate(clientHttpReq);
+//		
+//		
+
+		
 		try {
 			ResponseEntity<DataParent>respEntity = restTemplate.exchange(url, HttpMethod.GET, entity, DataParent.class);
 			DataParent result = respEntity.getBody();
 
 			return result;
 		}catch(Exception ex) {
-			ex.printStackTrace();
+			MyConstante.LOGGER.info(ex.getMessage());
 		}
 		return null;
 	}
+	
+
 
 	@Override
 	public void writeCSVFile(DataParent dataParent) {
+
 		String destination = getPropertyParameter("destination");
 
 		File outputFile = new File(destination+"ica.csv");
 		try {
 
-			drive.natixis.entities.Data data = dataParent.getData();
+			natixis.drive.entities.Data data = dataParent.getData();
 			Result[] results = data.getResult();
 
 			ICsvBeanWriter beanWriter = null;
@@ -154,19 +204,21 @@ public class MyService implements MyServiceInterface{
 				}
 
 			} catch (IOException ex) {
+				MyConstante.LOGGER.info(ex.getMessage());
 				ex.printStackTrace();
 			} finally {
 				if (beanWriter != null) {
 					try {
 						beanWriter.close();
 					} catch (IOException ex) {
-						ex.printStackTrace();
+						MyConstante.LOGGER.info(ex.getMessage());
 					}
 				}
 			}
 
 		}catch(Exception ex) {
-			ex.printStackTrace();
+			MyConstante.LOGGER.info("writeCSVFile para : " + ex.getMessage());
 		}
 	}
+
 }

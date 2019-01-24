@@ -3,7 +3,7 @@ package natixis.drive.services;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
-import drive.natixis.entities.DataParent;
+import natixis.drive.entities.DataParent;
 
 public interface MyServiceInterface {
 

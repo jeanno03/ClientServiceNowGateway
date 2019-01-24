@@ -5,49 +5,65 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Properties;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
+import org.apache.http.HttpHost;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 
-import drive.natixis.entities.DataParent;
 import natixis.drive.services.MyService;
 import natixis.drive.services.MyServiceInterface;
+import natixis.drive.entities.DataParent;
+import natixis.drive.services.MyConstante;
 
 @Configuration
 @ComponentScan(value = "natixis.drive.services")
 @SpringBootApplication
 public class ClientServiceNowGatewayApplication {
 
+	
+	
 	//normalement avec Spring pas besoin d'instancier cet objet
 	//A voir plus tard
 	@Autowired
 	private static MyServiceInterface myServiceInterface = new MyService();
-	
-	private static final Logger logger = Logger.getLogger("application log");
 
 	public static void main(String[] args) {
+		
 		SpringApplication app = new SpringApplication(ClientServiceNowGatewayApplication.class);
 		app.setDefaultProperties(Collections.singletonMap("server.port", "8083"));
-		app.run(args);
-
-//		Logger logger = Logger.getLogger("application log");  
+		ApplicationContext context = app.run(args);
+	
+//		not working
+		//new test
+		Properties props = System.getProperties();
+		props.put("https.proxyHost", "proxybusiness.intranet");
+		props.put("https.proxyPort", 3125);
 		
-		myServiceInterface.getFileHandler(logger);  
 
-		logger.info("**********Application start ***********"); 
-		logger.info("**********Method : getDataParentIca() ***********"); 
+		
+		myServiceInterface.getFileHandler(MyConstante.LOGGER);  
+
+		MyConstante.LOGGER.info("**********Application start ***********"); 
+		MyConstante.LOGGER.info("**********Method : getDataParentIca() ***********"); 
 		DataParent dataParent = myServiceInterface.getDataParentIca();
-		logger.info("**********Method : writeCSVFile(dataParent) ***********"); 	
+		MyConstante.LOGGER.info("**********Method : writeCSVFile(dataParent) ***********"); 	
 
 		myServiceInterface.writeCSVFile(dataParent);
 		
-		logger.info("**********Application stop ***********"); 
+		MyConstante.LOGGER.info("**********Application stop ***********"); 
+		
+		((ConfigurableApplicationContext)context).close();
 	}
 
 }

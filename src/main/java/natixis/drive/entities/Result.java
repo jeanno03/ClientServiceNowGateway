@@ -1,4 +1,4 @@
-package drive.natixis.entities;
+package natixis.drive.entities;
 
 public class Result {
 	
