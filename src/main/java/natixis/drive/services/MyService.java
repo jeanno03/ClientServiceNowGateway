@@ -5,7 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-//import java.net.InetSocketAddress;
+
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
@@ -14,20 +14,13 @@ import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
-import org.apache.http.HttpHost;
-//import org.springframework.cglib.proxy.Proxy;
-//import org.apache.http.HttpHost;
-//
-//import org.springframework.cglib.proxy.Proxy;
-//import org.springframework.context.annotation.Bean;
+import org.apache.commons.codec.binary.Base64;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-//import org.springframework.http.client.SimpleClientHttpRequestFactory;
-//import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-//import org.springframework.http.client.SimpleClientHttpRequestFactory;
+
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.supercsv.cellprocessor.constraint.NotNull;
@@ -35,9 +28,7 @@ import org.supercsv.cellprocessor.ift.CellProcessor;
 import org.supercsv.io.CsvBeanWriter;
 import org.supercsv.io.ICsvBeanWriter;
 import org.supercsv.prefs.CsvPreference;
-//import org.springframework.cglib.proxy.Proxy;
 
-//import natixis.drive.ClientServiceNowGatewayApplication;
 import natixis.drive.entities.DataParent;
 import natixis.drive.entities.Result;
 import natixis.drive.services.MyConstante;
@@ -45,57 +36,40 @@ import natixis.drive.services.MyConstante;
 @Service
 public class MyService implements MyServiceInterface{
 
-	private static Properties prop;
 	private static FileInputStream propFile;
 
-	private static final void loadPropertiesFile() {
-	
-		prop = new Properties();
+	public void loadPropertiesFile() {
+
+		//		prop = new Properties();
 		try {
 			propFile = new FileInputStream("C:/Files/FileInputStream.properties");
-		} catch (FileNotFoundException e) {
+			MyConstante.PROP.load(propFile);
 
-			e.printStackTrace();
-		} 
-		try {
-			prop.load(propFile);
-		} catch (IOException e) {
-
-			e.printStackTrace();
-		}
-
-	}
-	
-	private  void loadPropertiesFileService() {
-
-		prop = new Properties();
-		try {
-			propFile = new FileInputStream("C:/Files/FileInputStream.properties");
 		} catch (FileNotFoundException ex) {
 
-//			LOGGER.info(ex.getMessage());
-		} 
-		try {
-			prop.load(propFile);
+			ex.printStackTrace();
 		} catch (IOException ex) {
 
-//			LOGGER.info(ex.getMessage());
+			ex.printStackTrace();
+			
+		}finally {
+			
+			if(null!=propFile) {
+				try {
+					propFile.close();
+				}catch(Exception ex) {
+					ex.printStackTrace();	
+				}
+			}
 		}
 
+
 	}
-
-	private String getPropertyParameter(String para) {
-		loadPropertiesFile();
-		String str = prop.getProperty(para);
-
-		return str;
-	}
-
 
 	@Override
 	public void getFileHandler(Logger logger) {
 
-		String logs = getPropertyParameter("logs");
+		String logs = MyConstante.getPropertyParameter("logs");
 		boolean append = true;
 		Date day = new Date();
 		SimpleDateFormat formater = null;
@@ -120,38 +94,44 @@ public class MyService implements MyServiceInterface{
 	@Override
 	public DataParent getDataParentIca() {
 		//test
-//		HttpHost host = new HttpHost("proxybusiness.intranet", 3125, "https");
-		
+		//		HttpHost host = new HttpHost("proxybusiness.intranet", 3125, "https");
+
 		RestTemplate restTemplate = new RestTemplate();
-		String url = getPropertyParameter("url");
-		String username = getPropertyParameter("username");
-		String password = getPropertyParameter("password");
+		String url = MyConstante.getPropertyParameter("url");
+		String username = MyConstante.getPropertyParameter("username");
+		String password = MyConstante.getPropertyParameter("password");
+
+		MyConstante.LOGGER.info("url : " + url);
+		
+		//test commenté
+//		HttpHeaders headers = new HttpHeaders();
+//		headers.setAccept(Arrays.asList(new MediaType[] { MediaType.APPLICATION_JSON }));
+//		headers.setContentType(MediaType.APPLICATION_JSON);
+//		headers.setBasicAuth(username, password);		
+//		HttpEntity<String> entity = new HttpEntity<String> ("parameter", headers);
+		
+		//test non commenté
+		String plainCreds = username+":"+password;
+		byte[] plainCredsBytes = plainCreds.getBytes();
+		byte[] base64CredsBytes = Base64.encodeBase64(plainCredsBytes);
+		String base64Creds = new String(base64CredsBytes);
 
 		HttpHeaders headers = new HttpHeaders();
-		headers.setAccept(Arrays.asList(new MediaType[] { MediaType.APPLICATION_JSON }));
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.setBasicAuth(username, password);		
-		HttpEntity<String> entity = new HttpEntity<String> ("parameter", headers);
-		
-		
-
-		
-		
-//				props.put("http.proxyHost", "proxybusiness.intranet");
-//				props.put("http.proxyPort", 3125);
-		//test
-//		SimpleClientHttpRequestFactory clientHttpReq = new SimpleClientHttpRequestFactory();
-//		Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("your.proxy.server", 80));
-//		clientHttpReq.setProxy(proxy);
-//		 
-//		restTemplate = new RestTemplate(clientHttpReq);
-//		
-//		
-
+		headers.add("Authorization", "Basic " + base64Creds);
+		MyConstante.LOGGER.info("headers value : " + "Basic " + base64Creds);
+		HttpEntity<String> entity = new HttpEntity<String>(headers);
 		
 		try {
-			ResponseEntity<DataParent>respEntity = restTemplate.exchange(url, HttpMethod.GET, entity, DataParent.class);
-			DataParent result = respEntity.getBody();
+			
+			//test commenté
+//			ResponseEntity<DataParent>respEntity = restTemplate.exchange(MyConstante.URL, HttpMethod.GET, entity, DataParent.class);
+//			DataParent result = respEntity.getBody();
+			
+			//test non commenté
+		ResponseEntity<DataParent> respEntity = restTemplate.exchange(url, HttpMethod.GET, entity, DataParent.class);
+		DataParent result = respEntity.getBody();
+
+
 
 			return result;
 		}catch(Exception ex) {
@@ -159,13 +139,63 @@ public class MyService implements MyServiceInterface{
 		}
 		return null;
 	}
-	
 
 
 	@Override
+	public DataParent getDataParentIca2() {
+		//test
+		//		HttpHost host = new HttpHost("proxybusiness.intranet", 3125, "https");
+
+		RestTemplate restTemplate = new RestTemplate();
+		String url = MyConstante.getPropertyParameter("url");
+		String username = MyConstante.getPropertyParameter("username");
+		String password = MyConstante.getPropertyParameter("password");
+
+		MyConstante.LOGGER.info("url : " + url);
+		
+		//test commenté
+//		HttpHeaders headers = new HttpHeaders();
+//		headers.setAccept(Arrays.asList(new MediaType[] { MediaType.APPLICATION_JSON }));
+//		headers.setContentType(MediaType.APPLICATION_JSON);
+//		headers.setBasicAuth(username, password);		
+//		HttpEntity<String> entity = new HttpEntity<String> ("parameter", headers);
+		
+		//test non commenté
+		String plainCreds = username+":"+password;
+		byte[] plainCredsBytes = plainCreds.getBytes();
+		byte[] base64CredsBytes = Base64.encodeBase64(plainCredsBytes);
+		String base64Creds = new String(base64CredsBytes);
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("Authorization", "Basic " + base64Creds);
+		MyConstante.LOGGER.info("headers value : " + "Basic " + base64Creds);
+		HttpEntity<String> entity = new HttpEntity<String>(headers);
+		
+		try {
+			
+			//test commenté
+//			ResponseEntity<DataParent>respEntity = restTemplate.exchange(MyConstante.URL, HttpMethod.GET, entity, DataParent.class);
+//			DataParent result = respEntity.getBody();
+			
+			//test non commenté
+		ResponseEntity<DataParent> respEntity = restTemplate.exchange(url, HttpMethod.GET, entity, DataParent.class);
+		DataParent result = respEntity.getBody();
+
+
+
+			return result;
+		}catch(Exception ex) {
+			MyConstante.LOGGER.info(ex.getMessage());
+		}
+		return null;
+	}
+
+
+	
+	@Override
 	public void writeCSVFile(DataParent dataParent) {
 
-		String destination = getPropertyParameter("destination");
+		String destination = MyConstante.getPropertyParameter("destination");
 
 		File outputFile = new File(destination+"ica.csv");
 		try {
@@ -220,5 +250,8 @@ public class MyService implements MyServiceInterface{
 			MyConstante.LOGGER.info("writeCSVFile para : " + ex.getMessage());
 		}
 	}
+
+
+
 
 }

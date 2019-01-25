@@ -24,6 +24,8 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import natixis.drive.services.MyService;
 import natixis.drive.services.MyServiceInterface;
 import natixis.drive.entities.DataParent;
+import natixis.drive.services.HttpClientService;
+import natixis.drive.services.HttpClientServiceInterface;
 import natixis.drive.services.MyConstante;
 
 @Configuration
@@ -37,13 +39,28 @@ public class ClientServiceNowGatewayApplication {
 	//A voir plus tard
 	@Autowired
 	private static MyServiceInterface myServiceInterface = new MyService();
+	
+	@Autowired
+	private static HttpClientServiceInterface httpClientServiceInterface = new HttpClientService();
 
 	public static void main(String[] args) {
 		
 		SpringApplication app = new SpringApplication(ClientServiceNowGatewayApplication.class);
 		app.setDefaultProperties(Collections.singletonMap("server.port", "8083"));
 		ApplicationContext context = app.run(args);
-	
+		
+		//charge le fichier de paramétrage
+		myServiceInterface.loadPropertiesFile();
+		//démarrer les logs
+		myServiceInterface.getFileHandler(MyConstante.LOGGER);  
+		
+		MyConstante.LOGGER.info("**********Application start ***********"); 
+		
+		
+		//ByPass le certificat
+		httpClientServiceInterface.passByCertificat();
+
+		
 //		not working
 		//new test
 		Properties props = System.getProperties();
@@ -52,9 +69,9 @@ public class ClientServiceNowGatewayApplication {
 		
 
 		
-		myServiceInterface.getFileHandler(MyConstante.LOGGER);  
 
-		MyConstante.LOGGER.info("**********Application start ***********"); 
+
+
 		MyConstante.LOGGER.info("**********Method : getDataParentIca() ***********"); 
 		DataParent dataParent = myServiceInterface.getDataParentIca();
 		MyConstante.LOGGER.info("**********Method : writeCSVFile(dataParent) ***********"); 	
