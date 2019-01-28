@@ -1,7 +1,7 @@
 package natixis.drive.entities;
 
 public class Result {
-	
+
 	private String parent;
 	private String u_internal_group_watch_list;
 	private String u_mtx_financial_impact;
@@ -579,5 +579,4 @@ public class Result {
 				+ u_mtx_service_pca + ", u_impacted_business_ia_rpt=" + u_impacted_business_ia_rpt + "]";
 		
 	}	
-
 }

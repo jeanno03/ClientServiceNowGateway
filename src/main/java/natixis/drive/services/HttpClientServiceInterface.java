@@ -1,7 +1,9 @@
 package natixis.drive.services;
 
+import javax.net.ssl.TrustManager;
+
 public interface HttpClientServiceInterface {
-	
-	public void passByCertificat();
+
+	public String getStringFromSnow(String url);
 
 }

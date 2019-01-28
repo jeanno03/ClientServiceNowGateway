@@ -3,16 +3,11 @@ package natixis.drive.entities;
 public class DataParent {
 	
 	private Data data;
-	private Meta meta;
-	private Error error;
+	private Object meta;
+	private Object error;
 
 	public DataParent() {
 		super();
-	}
-
-	public DataParent(Data data) {
-		super();
-		this.data = data;
 	}
 
 	public Data getData() {
@@ -23,27 +18,25 @@ public class DataParent {
 		this.data = data;
 	}
 
-	public Meta getMeta() {
+	public Object getMeta() {
 		return meta;
 	}
 
-	public void setMeta(Meta meta) {
+	public void setMeta(Object meta) {
 		this.meta = meta;
 	}
 
-	public Error getError() {
+	public Object getError() {
 		return error;
 	}
 
-	public void setError(Error error) {
+	public void setError(Object error) {
 		this.error = error;
 	}
 
 	@Override
 	public String toString() {
-		return "DataParent [data=" + data + "]";
+		return "DataParent [data=" + data + ", meta=" + meta + ", error=" + error + "]";
 	}
-	
-	
 
 }
