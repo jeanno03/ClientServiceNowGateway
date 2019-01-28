@@ -25,17 +25,23 @@ import myconstants.MyConstant;
 
 @Service
 public class HttpClientService implements HttpClientServiceInterface{
-	
+
 
 	private TrustManager[ ] get_trust_mgr() {
-		TrustManager[ ] certs = new TrustManager[ ] {
-				new X509TrustManager() {
-					public X509Certificate[ ] getAcceptedIssuers() { return null; }
-					public void checkClientTrusted(X509Certificate[ ] certs, String t) { }
-					public void checkServerTrusted(X509Certificate[ ] certs, String t) { }
-				}
-		};
-		return certs;
+		try {
+			TrustManager[ ] certs = new TrustManager[ ] {
+					new X509TrustManager() {
+						public X509Certificate[ ] getAcceptedIssuers() { return null; }
+						public void checkClientTrusted(X509Certificate[ ] certs, String t) { }
+						public void checkServerTrusted(X509Certificate[ ] certs, String t) { }
+					}
+			};
+
+			return certs;	
+		}catch(Exception ex) {
+			MyConstant.LOGGER.info("Exception : " + ex.getMessage());
+		}
+		return null;
 	}
 
 	//connection works but String return not working
@@ -87,22 +93,24 @@ public class HttpClientService implements HttpClientServiceInterface{
 
 				try {
 					MyConstant.LOGGER.info("Response Code : " + con.getResponseCode());
-					MyConstant.LOGGER.info("Cipher Suite : " + con.getCipherSuite());	
+//					MyConstant.LOGGER.info("Cipher Suite : " + con.getCipherSuite());	
 
 					Certificate[] certs = con.getServerCertificates();
 					for(Certificate cert : certs){
-						MyConstant.LOGGER.info("Cert Type : " + cert.getType());
-						MyConstant.LOGGER.info("Cert Hash Code : " + cert.hashCode());
-						MyConstant.LOGGER.info("Cert Public Key Algorithm : " + cert.getPublicKey().getAlgorithm());
-						MyConstant.LOGGER.info("Cert Public Key Format : " + cert.getPublicKey().getFormat());
+//						MyConstant.LOGGER.info("Cert Type : " + cert.getType());
+//						MyConstant.LOGGER.info("Cert Hash Code : " + cert.hashCode());
+//						MyConstant.LOGGER.info("Cert Public Key Algorithm : " + cert.getPublicKey().getAlgorithm());
+//						MyConstant.LOGGER.info("Cert Public Key Format : " + cert.getPublicKey().getFormat());
 
 					}
 
 				} catch (SSLPeerUnverifiedException ex) {
-					MyConstant.LOGGER.info(ex.getMessage());
+					MyConstant.LOGGER.info("SSLPeerUnverifiedException : " +ex.getMessage());
 				} catch (IOException ex){
-					MyConstant.LOGGER.info(ex.getMessage());
-				}	   
+					MyConstant.LOGGER.info("IOException : " + ex.getMessage());
+				}catch(Exception ex) {
+					MyConstant.LOGGER.info("Exception : " + ex.getMessage());
+				}
 			}			
 
 			if(con!=null){
@@ -118,28 +126,30 @@ public class HttpClientService implements HttpClientServiceInterface{
 						result = result + input;
 					}
 					br.close();
-					
+
 					return result;
-					
+
 				} catch (IOException ex) {
-					MyConstant.LOGGER.info(ex.getMessage());
-				}		
+					MyConstant.LOGGER.info("IOException" + ex.getMessage());
+				}catch(Exception ex) {
+					MyConstant.LOGGER.info("Exception : " + ex.getMessage());
+				}	
 			}
 
 		} catch (MalformedURLException ex) {
-			MyConstant.LOGGER.info(ex.getMessage());
+			MyConstant.LOGGER.info("MalformedURLException : " + ex.getMessage());
 		} catch (IOException ex) {
-			MyConstant.LOGGER.info(ex.getMessage());
+			MyConstant.LOGGER.info("IOException : " + ex.getMessage());
 		}catch (NoSuchAlgorithmException ex) {
-			MyConstant.LOGGER.info(ex.getMessage());
+			MyConstant.LOGGER.info("NoSuchAlgorithmException : " + ex.getMessage());
 		}catch (KeyManagementException ex) {
-			MyConstant.LOGGER.info(ex.getMessage());
+			MyConstant.LOGGER.info("KeyManagementException : " + ex.getMessage());
 		}catch	 (ResourceAccessException ex) {
-			MyConstant.LOGGER.info(ex.getMessage());
+			MyConstant.LOGGER.info("ResourceAccessException : " + ex.getMessage());
 		}catch(Exception ex) {
-			MyConstant.LOGGER.info(ex.getMessage());
+			MyConstant.LOGGER.info("Exception : " + ex.getMessage());
 		}
-		
+
 		return null;
 	}
 

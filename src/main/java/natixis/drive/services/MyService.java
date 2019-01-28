@@ -43,10 +43,13 @@ public class MyService implements MyServiceInterface{
 
 	@Override
 	public void getProxyConfiguration() {
-
-		Properties props = System.getProperties();
-		props.put("https.proxyHost", "proxybusiness.intranet");
-		props.put("https.proxyPort", 3125);
+		try {
+			Properties props = System.getProperties();
+			props.put("https.proxyHost", "proxybusiness.intranet");
+			props.put("https.proxyPort", 3125);
+		}catch(Exception ex) {
+			MyConstant.LOGGER.info("Exception : " + ex.getMessage());
+		}
 
 	}
 
@@ -83,7 +86,7 @@ public class MyService implements MyServiceInterface{
 
 			HttpHeaders headers = new HttpHeaders();
 			headers.add("Authorization", "Basic " + base64Creds);
-			MyConstant.LOGGER.info("headers value : " + "Basic " + base64Creds);
+//			MyConstant.LOGGER.info("headers value : " + "Basic " + base64Creds);
 			HttpEntity<String> entity = new HttpEntity<String>(headers);
 
 			ResponseEntity<Object> respEntity = restTemplate.exchange(url, HttpMethod.GET, entity, Object.class);
@@ -91,13 +94,13 @@ public class MyService implements MyServiceInterface{
 
 			return result;
 		}catch(KeyManagementException ex) {
-			MyConstant.LOGGER.info(ex.getMessage());
+			MyConstant.LOGGER.info("KeyManagementException : " + ex.getMessage());
 		}catch(NoSuchAlgorithmException ex) {
-			MyConstant.LOGGER.info(ex.getMessage());
+			MyConstant.LOGGER.info("NoSuchAlgorithmException : " + ex.getMessage());
 		}catch(KeyStoreException ex) {
-			MyConstant.LOGGER.info(ex.getMessage());
+			MyConstant.LOGGER.info("KeyStoreException : " + ex.getMessage());
 		}catch(Exception ex) {
-			MyConstant.LOGGER.info(ex.getMessage());
+			MyConstant.LOGGER.info("Exception : " + ex.getMessage());
 		}
 
 		return null;
@@ -106,151 +109,159 @@ public class MyService implements MyServiceInterface{
 	@Override
 	public Result[] getObjectToIcaResultsTab (Object objectIca) {
 
-		ObjectMapper mapper = new ObjectMapper();
-		JsonNode root = mapper.convertValue(objectIca, JsonNode.class);
+		try {
 
-		//un noeud
-		JsonNode dataNode = root.path("Data");
+			ObjectMapper mapper = new ObjectMapper();
+			JsonNode root = mapper.convertValue(objectIca, JsonNode.class);
 
-		// un autre noeud
-		JsonNode resultNode = dataNode.path("result");
+			//un noeud
+			JsonNode dataNode = root.path("Data");
 
-		Result[] results = new Result[resultNode.size()];
+			// un autre noeud
+			JsonNode resultNode = dataNode.path("result");
 
-		int i=0;
+			Result[] results = new Result[resultNode.size()];
 
-		for(JsonNode node : resultNode) {
+			int i=0;
 
-			String parent = node.path("parent").asText();
-			String u_internal_group_watch_list = node.path("u_internal_group_watch_list").asText();
-			String u_mtx_financial_impact = node.path("u_mtx_financial_impact").asText();
-			String u_internal_watch_list = node.path("u_internal_watch_list").asText();
-			String sys_updated_on = node.path("sys_updated_on").asText();
-			String u_origin = node.path("u_origin").asText();
-			String number = node.path("number").asText();
-			String u_outage = node.path("u_outage").asText();
-			String u_business_service = node.path("u_business_service").asText();
-			String u_security_incident = node.path("u_security_incident").asText();
-			String sys_updated_by = node.path("sys_updated_by").asText();
-			String opened_by = node.path("opened_by").asText();
-			String sys_created_on = node.path("sys_created_on").asText();
-			String u_steering_commitee_count = node.path("u_steering_commitee_count").asText();
-			String u_mtx_user_impacted_perimeter = node.path("u_mtx_user_impacted_perimeter").asText();
-			String state = node.path("state").asText();
-			String u_operational_risk_reference = node.path("u_operational_risk_reference").asText();
-			String sys_created_by = node.path("sys_created_by").asText();
-			String u_root_cause_description = node.path("u_root_cause_description").asText();
-			String u_completed_at = node.path("u_completed_at").asText();
-			String closed_at = node.path("closed_at").asText();
-			String cmdb_ci = node.path("cmdb_ci").asText();
-			String impact = node.path("impact").asText();
-			String active = node.path("active").asText();
-			String u_impacted_customers = node.path("u_impacted_customers").asText();
-			String u_mtx_outage_downtime = node.path("u_mtx_outage_downtime").asText();
-			String u_cancel_reason = node.path("u_cancel_reason").asText();
-			String u_comm_linked_count = node.path("u_comm_linked_count").asText();
-			String u_resolution_action_summary = node.path("u_resolution_action_summary").asText();
-			String opened_at = node.path("opened_at").asText();
-			String u_problem = node.path("u_problem").asText();
-			String u_start_date = node.path("u_start_date").asText();
-			String u_outage_type = node.path("u_outage_type").asText();
-			String u_mtx_brand_image_impact = node.path("u_mtx_brand_image_impact").asText();
-			String work_notes = node.path("work_notes").asText();
-			String u_action_plan_summary = node.path("u_action_plan_summary").asText();
-			String short_description = node.path("short_description").asText();
-			String assignment_group = node.path("assignment_group").asText();
-			String u_completed_by = node.path("u_completed_by").asText();
-			String description = node.path("description").asText();
-			String u_calculated_impact = node.path("u_calculated_impact").asText();
-			String u_incident_avere_child_count = node.path("u_incident_avere_child_count").asText();
-			String u_source = node.path("u_source").asText();
-			String closed_by = node.path("closed_by").asText();
-			String sys_id = node.path("sys_id").asText();
-			String u_impacted_business_ia = node.path("u_impacted_business_ia").asText();
-			String u_end_date = node.path("u_end_date").asText();
-			String u_opening_group = node.path("u_opening_group").asText();
-			String assigned_to = node.path("assigned_to").asText();
-			String u_external_reference = node.path("u_external_reference").asText();
-			String u_quality_engineers_rpt = node.path("u_quality_engineers_rpt").asText();
-			String u_mtx_service_label = node.path("u_mtx_service_label").asText();
-			String u_problem_linked_count = node.path("u_problem_linked_count").asText();
-			String u_original_change = node.path("u_original_change").asText();
-			String u_environment = node.path("u_environment").asText();
-			String u_organisational_units_rpt = node.path("u_organisational_units_rpt").asText();
-			String u_origin_detailled = node.path("u_origin_detailled").asText();
-			String u_service_linked_count = node.path("u_service_linked_count").asText();
-			String u_mtx_service_pca = node.path("u_mtx_service_pca").asText();
-			String u_impacted_business_ia_rpt = node.path("u_impacted_business_ia_rpt").asText();
+			for(JsonNode node : resultNode) {
 
-			Result result = new Result();
-			result.setParent(parent);
-			result.setU_internal_group_watch_list(u_internal_group_watch_list);
-			result.setU_mtx_financial_impact(u_mtx_financial_impact);
-			result.setU_internal_watch_list(u_internal_watch_list);
-			result.setSys_updated_on(sys_updated_on);
-			result.setU_origin(u_origin);
-			result.setNumber(number);
-			result.setU_outage(u_outage);
-			result.setU_business_service(u_business_service);
-			result.setU_security_incident(u_security_incident);
-			result.setSys_updated_by(sys_updated_by);
-			result.setOpened_by(opened_by);
-			result.setSys_created_on(sys_created_on);
-			result.setU_steering_commitee_count(u_steering_commitee_count);
-			result.setU_mtx_user_impacted_perimeter(u_mtx_user_impacted_perimeter);
-			result.setState(state);
-			result.setU_operational_risk_reference(u_operational_risk_reference);
-			result.setSys_created_by(sys_created_by);
-			result.setU_root_cause_description(u_root_cause_description);
-			result.setU_completed_at(u_completed_at);
-			result.setClosed_at(closed_at);
-			result.setCmdb_ci(cmdb_ci);
-			result.setImpact(impact);
-			result.setActive(active);
-			result.setU_impacted_customers(u_impacted_customers);
-			result.setU_mtx_outage_downtime(u_mtx_outage_downtime);
-			result.setU_cancel_reason(u_cancel_reason);
-			result.setU_comm_linked_count(u_comm_linked_count);
-			result.setU_resolution_action_summary(u_resolution_action_summary);
-			result.setOpened_at(opened_at);
-			result.setU_problem(u_problem);
-			result.setU_start_date(u_start_date);
-			result.setU_outage_type(u_outage_type);
-			result.setU_mtx_brand_image_impact(u_mtx_brand_image_impact);
-			result.setWork_notes(work_notes);
-			result.setU_action_plan_summary(u_action_plan_summary);
-			result.setShort_description(short_description);
-			result.setAssignment_group(assignment_group);
-			result.setU_completed_by(u_completed_by);
-			result.setDescription(description);
-			result.setU_calculated_impact(u_calculated_impact);
-			result.setU_incident_avere_child_count(u_incident_avere_child_count);
-			result.setU_source(u_source);
-			result.setClosed_by(closed_by);
-			result.setSys_id(sys_id);
-			result.setU_impacted_business_ia(u_impacted_business_ia);
-			result.setU_end_date(u_end_date);
-			result.setU_opening_group(u_opening_group);
-			result.setAssigned_to(assigned_to);
-			result.setU_external_reference(u_external_reference);
-			result.setU_quality_engineers_rpt(u_quality_engineers_rpt);
-			result.setU_mtx_service_label(u_mtx_service_label);
-			result.setU_problem_linked_count(u_problem_linked_count);
-			result.setU_original_change(u_original_change);
-			result.setU_environment(u_environment);
-			result.setU_organisational_units_rpt(u_organisational_units_rpt);
-			result.setU_origin_detailled(u_origin_detailled);
-			result.setU_service_linked_count(u_service_linked_count);
-			result.setU_mtx_service_pca(u_mtx_service_pca);
-			result.setU_impacted_business_ia_rpt(u_impacted_business_ia_rpt);
+				String parent = node.path("parent").asText();
+				String u_internal_group_watch_list = node.path("u_internal_group_watch_list").asText();
+				String u_mtx_financial_impact = node.path("u_mtx_financial_impact").asText();
+				String u_internal_watch_list = node.path("u_internal_watch_list").asText();
+				String sys_updated_on = node.path("sys_updated_on").asText();
+				String u_origin = node.path("u_origin").asText();
+				String number = node.path("number").asText();
+				String u_outage = node.path("u_outage").asText();
+				String u_business_service = node.path("u_business_service").asText();
+				String u_security_incident = node.path("u_security_incident").asText();
+				String sys_updated_by = node.path("sys_updated_by").asText();
+				String opened_by = node.path("opened_by").asText();
+				String sys_created_on = node.path("sys_created_on").asText();
+				String u_steering_commitee_count = node.path("u_steering_commitee_count").asText();
+				String u_mtx_user_impacted_perimeter = node.path("u_mtx_user_impacted_perimeter").asText();
+				String state = node.path("state").asText();
+				String u_operational_risk_reference = node.path("u_operational_risk_reference").asText();
+				String sys_created_by = node.path("sys_created_by").asText();
+				String u_root_cause_description = node.path("u_root_cause_description").asText();
+				String u_completed_at = node.path("u_completed_at").asText();
+				String closed_at = node.path("closed_at").asText();
+				String cmdb_ci = node.path("cmdb_ci").asText();
+				String impact = node.path("impact").asText();
+				String active = node.path("active").asText();
+				String u_impacted_customers = node.path("u_impacted_customers").asText();
+				String u_mtx_outage_downtime = node.path("u_mtx_outage_downtime").asText();
+				String u_cancel_reason = node.path("u_cancel_reason").asText();
+				String u_comm_linked_count = node.path("u_comm_linked_count").asText();
+				String u_resolution_action_summary = node.path("u_resolution_action_summary").asText();
+				String opened_at = node.path("opened_at").asText();
+				String u_problem = node.path("u_problem").asText();
+				String u_start_date = node.path("u_start_date").asText();
+				String u_outage_type = node.path("u_outage_type").asText();
+				String u_mtx_brand_image_impact = node.path("u_mtx_brand_image_impact").asText();
+				String work_notes = node.path("work_notes").asText();
+				String u_action_plan_summary = node.path("u_action_plan_summary").asText();
+				String short_description = node.path("short_description").asText();
+				String assignment_group = node.path("assignment_group").asText();
+				String u_completed_by = node.path("u_completed_by").asText();
+				String description = node.path("description").asText();
+				String u_calculated_impact = node.path("u_calculated_impact").asText();
+				String u_incident_avere_child_count = node.path("u_incident_avere_child_count").asText();
+				String u_source = node.path("u_source").asText();
+				String closed_by = node.path("closed_by").asText();
+				String sys_id = node.path("sys_id").asText();
+				String u_impacted_business_ia = node.path("u_impacted_business_ia").asText();
+				String u_end_date = node.path("u_end_date").asText();
+				String u_opening_group = node.path("u_opening_group").asText();
+				String assigned_to = node.path("assigned_to").asText();
+				String u_external_reference = node.path("u_external_reference").asText();
+				String u_quality_engineers_rpt = node.path("u_quality_engineers_rpt").asText();
+				String u_mtx_service_label = node.path("u_mtx_service_label").asText();
+				String u_problem_linked_count = node.path("u_problem_linked_count").asText();
+				String u_original_change = node.path("u_original_change").asText();
+				String u_environment = node.path("u_environment").asText();
+				String u_organisational_units_rpt = node.path("u_organisational_units_rpt").asText();
+				String u_origin_detailled = node.path("u_origin_detailled").asText();
+				String u_service_linked_count = node.path("u_service_linked_count").asText();
+				String u_mtx_service_pca = node.path("u_mtx_service_pca").asText();
+				String u_impacted_business_ia_rpt = node.path("u_impacted_business_ia_rpt").asText();
 
-			results[i]=result;
-			i=i+1;	
+				Result result = new Result();
+				result.setParent(parent);
+				result.setU_internal_group_watch_list(u_internal_group_watch_list);
+				result.setU_mtx_financial_impact(u_mtx_financial_impact);
+				result.setU_internal_watch_list(u_internal_watch_list);
+				result.setSys_updated_on(sys_updated_on);
+				result.setU_origin(u_origin);
+				result.setNumber(number);
+				result.setU_outage(u_outage);
+				result.setU_business_service(u_business_service);
+				result.setU_security_incident(u_security_incident);
+				result.setSys_updated_by(sys_updated_by);
+				result.setOpened_by(opened_by);
+				result.setSys_created_on(sys_created_on);
+				result.setU_steering_commitee_count(u_steering_commitee_count);
+				result.setU_mtx_user_impacted_perimeter(u_mtx_user_impacted_perimeter);
+				result.setState(state);
+				result.setU_operational_risk_reference(u_operational_risk_reference);
+				result.setSys_created_by(sys_created_by);
+				result.setU_root_cause_description(u_root_cause_description);
+				result.setU_completed_at(u_completed_at);
+				result.setClosed_at(closed_at);
+				result.setCmdb_ci(cmdb_ci);
+				result.setImpact(impact);
+				result.setActive(active);
+				result.setU_impacted_customers(u_impacted_customers);
+				result.setU_mtx_outage_downtime(u_mtx_outage_downtime);
+				result.setU_cancel_reason(u_cancel_reason);
+				result.setU_comm_linked_count(u_comm_linked_count);
+				result.setU_resolution_action_summary(u_resolution_action_summary);
+				result.setOpened_at(opened_at);
+				result.setU_problem(u_problem);
+				result.setU_start_date(u_start_date);
+				result.setU_outage_type(u_outage_type);
+				result.setU_mtx_brand_image_impact(u_mtx_brand_image_impact);
+				result.setWork_notes(work_notes);
+				result.setU_action_plan_summary(u_action_plan_summary);
+				result.setShort_description(short_description);
+				result.setAssignment_group(assignment_group);
+				result.setU_completed_by(u_completed_by);
+				result.setDescription(description);
+				result.setU_calculated_impact(u_calculated_impact);
+				result.setU_incident_avere_child_count(u_incident_avere_child_count);
+				result.setU_source(u_source);
+				result.setClosed_by(closed_by);
+				result.setSys_id(sys_id);
+				result.setU_impacted_business_ia(u_impacted_business_ia);
+				result.setU_end_date(u_end_date);
+				result.setU_opening_group(u_opening_group);
+				result.setAssigned_to(assigned_to);
+				result.setU_external_reference(u_external_reference);
+				result.setU_quality_engineers_rpt(u_quality_engineers_rpt);
+				result.setU_mtx_service_label(u_mtx_service_label);
+				result.setU_problem_linked_count(u_problem_linked_count);
+				result.setU_original_change(u_original_change);
+				result.setU_environment(u_environment);
+				result.setU_organisational_units_rpt(u_organisational_units_rpt);
+				result.setU_origin_detailled(u_origin_detailled);
+				result.setU_service_linked_count(u_service_linked_count);
+				result.setU_mtx_service_pca(u_mtx_service_pca);
+				result.setU_impacted_business_ia_rpt(u_impacted_business_ia_rpt);
 
+				results[i]=result;
+				i=i+1;	
+
+			}
+
+			return results;
+
+		}catch(Exception ex) {
+
+			MyConstant.LOGGER.info("Exception : " + ex.getMessage());
 		}
 
-		return results;
-
+		return null;
 	}
 
 	@Override
@@ -292,20 +303,23 @@ public class MyService implements MyServiceInterface{
 				}
 
 			} catch (IOException ex) {
-				MyConstant.LOGGER.info(ex.getMessage());
-				ex.printStackTrace();
+				MyConstant.LOGGER.info("IOException : " + ex.getMessage());
+			}catch(Exception ex) {
+				MyConstant.LOGGER.info("Exception : " + ex.getMessage());
 			} finally {
 				if (beanWriter != null) {
 					try {
 						beanWriter.close();
 					} catch (IOException ex) {
-						MyConstant.LOGGER.info(ex.getMessage());
+						MyConstant.LOGGER.info("IOException : " + ex.getMessage());
+					}catch(Exception ex) {
+						MyConstant.LOGGER.info("Exception : " + ex.getMessage());;
 					}
 				}
 			}
 
 		}catch(Exception ex) {
-			MyConstant.LOGGER.info("writeCSVFile para : " + ex.getMessage());
+			MyConstant.LOGGER.info("Exception : " + ex.getMessage());;
 		}
 	}
 
