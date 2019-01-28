@@ -12,11 +12,6 @@ public interface MyConstant {
 	public static final String PATH_FILE_INPUT_STREAM = "C:/Files/FileInputStream.properties";
 	public static final Properties PROP = new Properties();
 
-
-//	public  static String URL = "https://blabla";
-	
-		
-
 	public static String getPropertyParameter(String para) {
 		String str = MyConstant.PROP.getProperty(para);
 		return str;

@@ -38,7 +38,7 @@ public class HttpClientService implements HttpClientServiceInterface{
 		return certs;
 	}
 
-	
+	//connection works but String return not working
 	public String getStringFromSnow(String url){
 
 		MyConstant.LOGGER.info("url : " + url);
@@ -83,8 +83,6 @@ public class HttpClientService implements HttpClientServiceInterface{
 				}
 			});
 
-			//facultatif début*********************************
-
 			if(con!=null){
 
 				try {
@@ -98,37 +96,28 @@ public class HttpClientService implements HttpClientServiceInterface{
 						MyConstant.LOGGER.info("Cert Public Key Algorithm : " + cert.getPublicKey().getAlgorithm());
 						MyConstant.LOGGER.info("Cert Public Key Format : " + cert.getPublicKey().getFormat());
 
-
 					}
-
 
 				} catch (SSLPeerUnverifiedException ex) {
 					MyConstant.LOGGER.info(ex.getMessage());
 				} catch (IOException ex){
 					MyConstant.LOGGER.info(ex.getMessage());
 				}	   
-			}
-			
-			//facultatif fin *********************************
+			}			
 
 			if(con!=null){
 
 				try {
-
 					BufferedReader br = 
 							new BufferedReader(
 									new InputStreamReader(con.getInputStream(), "UTF8"));
-
 					String input;
 					String result = null;
 
-					while ((input = br.readLine()) != null){
-				
+					while ((input = br.readLine()) != null){		
 						result = result + input;
-
 					}
 					br.close();
-
 					
 					return result;
 					
@@ -136,8 +125,6 @@ public class HttpClientService implements HttpClientServiceInterface{
 					MyConstant.LOGGER.info(ex.getMessage());
 				}		
 			}
-			
-			
 
 		} catch (MalformedURLException ex) {
 			MyConstant.LOGGER.info(ex.getMessage());
@@ -155,58 +142,5 @@ public class HttpClientService implements HttpClientServiceInterface{
 		
 		return null;
 	}
-
-	//facultatif
-//	private void print_https_cert(HttpsURLConnection con){
-//				
-//		if(con!=null){
-//
-//			try {
-//				MyConstant.LOGGER.info("Response Code : " + con.getResponseCode());
-//				MyConstant.LOGGER.info("Cipher Suite : " + con.getCipherSuite());	
-//
-//				Certificate[] certs = con.getServerCertificates();
-//				for(Certificate cert : certs){
-//					MyConstant.LOGGER.info("Cert Type : " + cert.getType());
-//					MyConstant.LOGGER.info("Cert Hash Code : " + cert.hashCode());
-//					MyConstant.LOGGER.info("Cert Public Key Algorithm : " + cert.getPublicKey().getAlgorithm());
-//					MyConstant.LOGGER.info("Cert Public Key Format : " + cert.getPublicKey().getFormat());
-//
-//
-//				}
-//
-//
-//			} catch (SSLPeerUnverifiedException ex) {
-//				MyConstant.LOGGER.info(ex.getMessage());
-//			} catch (IOException ex){
-//				MyConstant.LOGGER.info(ex.getMessage());
-//			}	   
-//		}		
-//	}
-
-	
-//	private void print_content(HttpsURLConnection con){
-//		if(con!=null){
-//
-//			try {
-//				MyConstant.LOGGER.info("****** Content of the URL ********");
-//
-//				BufferedReader br = 
-//						new BufferedReader(
-//								new InputStreamReader(con.getInputStream()));
-//
-//				String input;
-//
-//				while ((input = br.readLine()) != null){
-//					MyConstant.LOGGER.info(input);
-//
-//				}
-//				br.close();
-//
-//			} catch (IOException ex) {
-//				MyConstant.LOGGER.info(ex.getMessage());
-//			}		
-//		}
-//	}
 
 }

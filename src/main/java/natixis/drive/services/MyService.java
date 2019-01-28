@@ -1,40 +1,24 @@
 package natixis.drive.services;
 
-import java.io.ByteArrayInputStream;
+
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
-import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
-import java.util.logging.FileHandler;
-import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
-
-import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.json.JSONObject;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
@@ -44,22 +28,16 @@ import org.supercsv.cellprocessor.ift.CellProcessor;
 import org.supercsv.io.CsvBeanWriter;
 import org.supercsv.io.ICsvBeanWriter;
 import org.supercsv.prefs.CsvPreference;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
-import com.fasterxml.jackson.databind.ObjectWriter;
-
 import myconstants.MyConstant;
-import natixis.drive.entities.Data;
-import natixis.drive.entities.DataParent;
 import natixis.drive.entities.Result;
-import natixis.drive.entities.ResultList;
 
 @Service
 public class MyService implements MyServiceInterface{
+
+
+
 
 	private static FileInputStream propFile;
 
@@ -71,38 +49,6 @@ public class MyService implements MyServiceInterface{
 		props.put("https.proxyPort", 3125);
 
 	}
-
-	//	@Override
-	//	public DataParent getDataParentIca() {
-	//
-	//		RestTemplate restTemplate = new RestTemplate();
-	//		String url = MyConstant.getPropertyParameter("url");
-	//		String username = MyConstant.getPropertyParameter("username");
-	//		String password = MyConstant.getPropertyParameter("password");
-	//
-	//		MyConstant.LOGGER.info("url : " + url);
-	//
-	//		String plainCreds = username+":"+password;
-	//		byte[] plainCredsBytes = plainCreds.getBytes();
-	//		byte[] base64CredsBytes = Base64.encodeBase64(plainCredsBytes);
-	//		String base64Creds = new String(base64CredsBytes);
-	//
-	//		HttpHeaders headers = new HttpHeaders();
-	//		headers.add("Authorization", "Basic " + base64Creds);
-	//		MyConstant.LOGGER.info("headers value : " + "Basic " + base64Creds);
-	//		HttpEntity<String> entity = new HttpEntity<String>(headers);
-	//		
-	//		try {
-	//
-	//		ResponseEntity<DataParent> respEntity = restTemplate.exchange(url, HttpMethod.GET, entity, DataParent.class);
-	//		DataParent result = respEntity.getBody();
-	//
-	//			return result;
-	//		}catch(Exception ex) {
-	//			MyConstant.LOGGER.info(ex.getMessage());
-	//		}
-	//		return null;
-	//	}
 
 	@Override
 	public Object getSnowToObject(String url) {
@@ -166,17 +112,8 @@ public class MyService implements MyServiceInterface{
 		//un noeud
 		JsonNode dataNode = root.path("Data");
 
-
 		// un autre noeud
 		JsonNode resultNode = dataNode.path("result");
-		if (resultNode.isArray()) {
-			//			it works
-			//			MyConstant.LOGGER.info("resultNode.isArray() is true ");
-			//			MyConstant.LOGGER.info("resultNode.size() : " + resultNode.size());
-		}
-		else {
-			MyConstant.LOGGER.info("resultNode.isArray() is false ");
-		}
 
 		Result[] results = new Result[resultNode.size()];
 
@@ -316,451 +253,6 @@ public class MyService implements MyServiceInterface{
 
 	}
 
-	//not working
-	@Override
-	public JsonNode getSnowToJsonNode(String url) {
-
-		TrustStrategy acceptingTrustStrategy = (X509Certificate[] chain, String authType) -> true;
-		try {
-			SSLContext sslContext = org.apache.http.ssl.SSLContexts.custom()
-					.loadTrustMaterial(null, acceptingTrustStrategy)
-					.build();
-
-			SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext);
-
-			CloseableHttpClient httpClient = HttpClients.custom()
-					.setSSLSocketFactory(csf)
-					.build();
-
-			HttpComponentsClientHttpRequestFactory requestFactory =
-					new HttpComponentsClientHttpRequestFactory();
-
-			requestFactory.setHttpClient(httpClient);
-			RestTemplate restTemplate = new RestTemplate(requestFactory);
-
-			String username = MyConstant.getPropertyParameter("username");
-			String password = MyConstant.getPropertyParameter("password");
-
-			MyConstant.LOGGER.info("url : " + url);
-
-			String plainCreds = username+":"+password;
-			byte[] plainCredsBytes = plainCreds.getBytes();
-			byte[] base64CredsBytes = Base64.encodeBase64(plainCredsBytes);
-			String base64Creds = new String(base64CredsBytes);
-
-			HttpHeaders headers = new HttpHeaders();
-			headers.add("Authorization", "Basic " + base64Creds);
-			MyConstant.LOGGER.info("headers value : " + "Basic " + base64Creds);
-			HttpEntity<String> entity = new HttpEntity<String>(headers);
-
-			ResponseEntity<Object> respEntity = restTemplate.exchange(url, HttpMethod.GET, entity, Object.class);
-
-			ObjectMapper mapper = new ObjectMapper();
-			Object obj = respEntity.getBody();
-			JsonNode root = mapper.readTree(new File(obj.toString()));
-
-			//un noeud
-			JsonNode dataNode = root.path("Data");
-
-
-			// un autre noeud
-			JsonNode resultNode = dataNode.path("result");
-			if (resultNode.isArray()) {
-				MyConstant.LOGGER.info("resultNode.isArray() is true ");
-				MyConstant.LOGGER.info("resultNode.size() : " + resultNode.size());
-			}
-			else {
-				MyConstant.LOGGER.info("resultNode.isArray() is false ");
-			}
-			for(JsonNode node : resultNode) {
-				String u_internal_group_watch_list = node.path("u_internal_group_watch_list").asText();
-				MyConstant.LOGGER.info("u_internal_group_watch_list : " + u_internal_group_watch_list);
-			}
-
-
-			return root;
-
-		}catch(KeyManagementException ex) {
-			MyConstant.LOGGER.info("KeyManagementException : "+ ex.getMessage());
-		}catch(NoSuchAlgorithmException ex) {
-			MyConstant.LOGGER.info("NoSuchAlgorithmException : "+ ex.getMessage());
-		}catch(KeyStoreException ex) {
-			MyConstant.LOGGER.info("KeyStoreException : "+ ex.getMessage());
-		}catch(Exception ex) {
-			MyConstant.LOGGER.info("Exception : "+ ex.getMessage());
-		}
-
-		return null;
-	}
-
-
-	//	not working
-	@Override
-	public void getSnowWithJackson(String url) {
-
-		try {
-
-			ObjectMapper objectMapper = new ObjectMapper();
-
-
-			//converting json to Map
-			//		byte[] mapData = url.getBytes();
-
-			Map<String,String> myMap = new HashMap<String, String>();
-
-			myMap = objectMapper.readValue(url, HashMap.class);
-
-			MyConstant.LOGGER.info("Map is: "+myMap); 
-
-
-			String json = url;
-			Map<String, Object> map 
-			= objectMapper.readValue(json, new TypeReference<Map<String,Object>>(){});	
-
-			//		System.out.println("Map using TypeReference: "+map);
-			MyConstant.LOGGER.info("Map using TypeReference: "+map); 
-
-		} catch (JsonProcessingException ex) {
-			// TODO Auto-generated catch block
-			MyConstant.LOGGER.info(ex.getMessage());
-		} catch (IOException ex) {
-			// TODO Auto-generated catch block
-			MyConstant.LOGGER.info(ex.getMessage());
-		}catch (Exception ex) {
-			MyConstant.LOGGER.info(ex.getMessage());
-		}
-
-
-
-
-	}
-
-	//	@Override
-	//	public Result[] getDataParentIca3() {
-	//
-	//		    TrustStrategy acceptingTrustStrategy = (X509Certificate[] chain, String authType) -> true;
-	//try {
-	//		    SSLContext sslContext = org.apache.http.ssl.SSLContexts.custom()
-	//		                    .loadTrustMaterial(null, acceptingTrustStrategy)
-	//		                    .build();
-	//
-	//		    SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext);
-	//
-	//		    CloseableHttpClient httpClient = HttpClients.custom()
-	//		                    .setSSLSocketFactory(csf)
-	//		                    .build();
-	//
-	//		    HttpComponentsClientHttpRequestFactory requestFactory =
-	//		                    new HttpComponentsClientHttpRequestFactory();
-	//
-	//		    requestFactory.setHttpClient(httpClient);
-	//		    RestTemplate restTemplate = new RestTemplate(requestFactory);
-	//
-	//		String url = MyConstant.getPropertyParameter("url");
-	//		String username = MyConstant.getPropertyParameter("username");
-	//		String password = MyConstant.getPropertyParameter("password");
-	//
-	//		MyConstant.LOGGER.info("url : " + url);
-	//
-	//		String plainCreds = username+":"+password;
-	//		byte[] plainCredsBytes = plainCreds.getBytes();
-	//		byte[] base64CredsBytes = Base64.encodeBase64(plainCredsBytes);
-	//		String base64Creds = new String(base64CredsBytes);
-	//
-	//		HttpHeaders headers = new HttpHeaders();
-	//		headers.add("Authorization", "Basic " + base64Creds);
-	//		MyConstant.LOGGER.info("headers value : " + "Basic " + base64Creds);
-	//		HttpEntity<String> entity = new HttpEntity<String>(headers);
-	//
-	//		ResponseEntity<Result[]> respEntity = restTemplate.exchange(url, HttpMethod.GET, entity, Result[].class);
-	//		Result[] result = respEntity.getBody();
-	//
-	//			return result;
-	//		}catch(KeyManagementException ex) {
-	//			MyConstant.LOGGER.info(ex.getMessage());
-	//		}catch(NoSuchAlgorithmException ex) {
-	//			MyConstant.LOGGER.info(ex.getMessage());
-	//		}catch(KeyStoreException ex) {
-	//			MyConstant.LOGGER.info(ex.getMessage());
-	//		}catch(Exception ex) {
-	//			MyConstant.LOGGER.info(ex.getMessage());
-	//		}
-	//
-	//		return null;
-	//	}
-
-	//	@Override
-	//	public Data getDataParentIca4() {
-	//
-	//		    TrustStrategy acceptingTrustStrategy = (X509Certificate[] chain, String authType) -> true;
-	//try {
-	//		    SSLContext sslContext = org.apache.http.ssl.SSLContexts.custom()
-	//		                    .loadTrustMaterial(null, acceptingTrustStrategy)
-	//		                    .build();
-	//
-	//		    SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext);
-	//
-	//		    CloseableHttpClient httpClient = HttpClients.custom()
-	//		                    .setSSLSocketFactory(csf)
-	//		                    .build();
-	//
-	//		    HttpComponentsClientHttpRequestFactory requestFactory =
-	//		                    new HttpComponentsClientHttpRequestFactory();
-	//
-	//		    requestFactory.setHttpClient(httpClient);
-	//		    RestTemplate restTemplate = new RestTemplate(requestFactory);
-	//
-	//		String url = MyConstant.getPropertyParameter("url");
-	//		String username = MyConstant.getPropertyParameter("username");
-	//		String password = MyConstant.getPropertyParameter("password");
-	//
-	//		MyConstant.LOGGER.info("url : " + url);
-	//
-	//		String plainCreds = username+":"+password;
-	//		byte[] plainCredsBytes = plainCreds.getBytes();
-	//		byte[] base64CredsBytes = Base64.encodeBase64(plainCredsBytes);
-	//		String base64Creds = new String(base64CredsBytes);
-	//
-	//		HttpHeaders headers = new HttpHeaders();
-	//		headers.add("Authorization", "Basic " + base64Creds);
-	//		MyConstant.LOGGER.info("headers value : " + "Basic " + base64Creds);
-	//		HttpEntity<String> entity = new HttpEntity<String>(headers);
-	//
-	//		ResponseEntity<Data> respEntity = restTemplate.exchange(url, HttpMethod.GET, entity, Data.class);
-	//		Data result = respEntity.getBody();
-	//
-	//			return result;
-	//		}catch(KeyManagementException ex) {
-	//			MyConstant.LOGGER.info(ex.getMessage());
-	//		}catch(NoSuchAlgorithmException ex) {
-	//			MyConstant.LOGGER.info(ex.getMessage());
-	//		}catch(KeyStoreException ex) {
-	//			MyConstant.LOGGER.info(ex.getMessage());
-	//		}catch(Exception ex) {
-	//			MyConstant.LOGGER.info(ex.getMessage());
-	//		}
-	//
-	//		return null;
-	//	}
-
-	//	@Override
-	//	public DataParent getDataParentIca5() {
-	//
-	//		    TrustStrategy acceptingTrustStrategy = (X509Certificate[] chain, String authType) -> true;
-	//try {
-	//		    SSLContext sslContext = org.apache.http.ssl.SSLContexts.custom()
-	//		                    .loadTrustMaterial(null, acceptingTrustStrategy)
-	//		                    .build();
-	//
-	//		    SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext);
-	//
-	//		    CloseableHttpClient httpClient = HttpClients.custom()
-	//		                    .setSSLSocketFactory(csf)
-	//		                    .build();
-	//
-	//		    HttpComponentsClientHttpRequestFactory requestFactory =
-	//		                    new HttpComponentsClientHttpRequestFactory();
-	//
-	//		    requestFactory.setHttpClient(httpClient);
-	//		    RestTemplate restTemplate = new RestTemplate(requestFactory);
-	//
-	//		String url = MyConstant.getPropertyParameter("url");
-	//		String username = MyConstant.getPropertyParameter("username");
-	//		String password = MyConstant.getPropertyParameter("password");
-	//
-	//		MyConstant.LOGGER.info("url : " + url);
-	//
-	//		String plainCreds = username+":"+password;
-	//		byte[] plainCredsBytes = plainCreds.getBytes();
-	//		byte[] base64CredsBytes = Base64.encodeBase64(plainCredsBytes);
-	//		String base64Creds = new String(base64CredsBytes);
-	//
-	//		HttpHeaders headers = new HttpHeaders();
-	//		headers.add("Authorization", "Basic " + base64Creds);
-	//		MyConstant.LOGGER.info("headers value : " + "Basic " + base64Creds);
-	//		HttpEntity<String> entity = new HttpEntity<String>(headers);
-	//
-	//		ResponseEntity<DataParent> respEntity = restTemplate.exchange(url, HttpMethod.GET, entity, DataParent.class);
-	//		DataParent dataParent = respEntity.getBody();
-	//
-	//			return dataParent;
-	//		}catch(KeyManagementException ex) {
-	//			MyConstant.LOGGER.info(ex.getMessage());
-	//		}catch(NoSuchAlgorithmException ex) {
-	//			MyConstant.LOGGER.info(ex.getMessage());
-	//		}catch(KeyStoreException ex) {
-	//			MyConstant.LOGGER.info(ex.getMessage());
-	//		}catch(Exception ex) {
-	//			MyConstant.LOGGER.info(ex.getMessage());
-	//		}
-	//
-	//		return null;
-	//	}
-
-	//	@Override
-	//	public ResultList getDataParentIca7() {
-	//
-	//		    TrustStrategy acceptingTrustStrategy = (X509Certificate[] chain, String authType) -> true;
-	//try {
-	//		    SSLContext sslContext = org.apache.http.ssl.SSLContexts.custom()
-	//		                    .loadTrustMaterial(null, acceptingTrustStrategy)
-	//		                    .build();
-	//
-	//		    SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext);
-	//
-	//		    CloseableHttpClient httpClient = HttpClients.custom()
-	//		                    .setSSLSocketFactory(csf)
-	//		                    .build();
-	//
-	//		    HttpComponentsClientHttpRequestFactory requestFactory =
-	//		                    new HttpComponentsClientHttpRequestFactory();
-	//
-	//		    requestFactory.setHttpClient(httpClient);
-	//		    RestTemplate restTemplate = new RestTemplate(requestFactory);
-	//
-	//		String url = MyConstant.getPropertyParameter("url");
-	//		String username = MyConstant.getPropertyParameter("username");
-	//		String password = MyConstant.getPropertyParameter("password");
-	//
-	//		MyConstant.LOGGER.info("url : " + url);
-	//
-	//		String plainCreds = username+":"+password;
-	//		byte[] plainCredsBytes = plainCreds.getBytes();
-	//		byte[] base64CredsBytes = Base64.encodeBase64(plainCredsBytes);
-	//		String base64Creds = new String(base64CredsBytes);
-	//
-	//		HttpHeaders headers = new HttpHeaders();
-	//		headers.add("Authorization", "Basic " + base64Creds);
-	//		MyConstant.LOGGER.info("headers value : " + "Basic " + base64Creds);
-	//		HttpEntity<String> entity = new HttpEntity<String>(headers);
-	//
-	//		ResponseEntity<ResultList> respEntity = restTemplate.exchange(url, HttpMethod.GET, entity, ResultList.class);
-	//		ResultList resultList = respEntity.getBody();
-	//
-	//			return resultList;
-	//		}catch(KeyManagementException ex) {
-	//			MyConstant.LOGGER.info(ex.getMessage());
-	//		}catch(NoSuchAlgorithmException ex) {
-	//			MyConstant.LOGGER.info(ex.getMessage());
-	//		}catch(KeyStoreException ex) {
-	//			MyConstant.LOGGER.info(ex.getMessage());
-	//		}catch(Exception ex) {
-	//			MyConstant.LOGGER.info(ex.getMessage());
-	//		}
-	//
-	//		return null;
-	//	}
-
-	//	@Override
-	//	public JSONObject getDataParentIca8() {
-	//
-	//		    TrustStrategy acceptingTrustStrategy = (X509Certificate[] chain, String authType) -> true;
-	//try {
-	//		    SSLContext sslContext = org.apache.http.ssl.SSLContexts.custom()
-	//		                    .loadTrustMaterial(null, acceptingTrustStrategy)
-	//		                    .build();
-	//
-	//		    SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext);
-	//
-	//		    CloseableHttpClient httpClient = HttpClients.custom()
-	//		                    .setSSLSocketFactory(csf)
-	//		                    .build();
-	//
-	//		    HttpComponentsClientHttpRequestFactory requestFactory =
-	//		                    new HttpComponentsClientHttpRequestFactory();
-	//
-	//		    requestFactory.setHttpClient(httpClient);
-	//		    RestTemplate restTemplate = new RestTemplate(requestFactory);
-	//
-	//		String url = MyConstant.getPropertyParameter("url");
-	//		String username = MyConstant.getPropertyParameter("username");
-	//		String password = MyConstant.getPropertyParameter("password");
-	//
-	//		MyConstant.LOGGER.info("url : " + url);
-	//
-	//		String plainCreds = username+":"+password;
-	//		byte[] plainCredsBytes = plainCreds.getBytes();
-	//		byte[] base64CredsBytes = Base64.encodeBase64(plainCredsBytes);
-	//		String base64Creds = new String(base64CredsBytes);
-	//
-	//		HttpHeaders headers = new HttpHeaders();
-	//		headers.add("Authorization", "Basic " + base64Creds);
-	//		MyConstant.LOGGER.info("headers value : " + "Basic " + base64Creds);
-	//		HttpEntity<String> entity = new HttpEntity<String>(headers);
-	//
-	//		ResponseEntity<JSONObject> respEntity = restTemplate.exchange(url, HttpMethod.GET, entity, JSONObject.class);
-	//		JSONObject jSONObject = respEntity.getBody();
-	//
-	//			return jSONObject;
-	//		}catch(KeyManagementException ex) {
-	//			MyConstant.LOGGER.info(ex.getMessage());
-	//		}catch(NoSuchAlgorithmException ex) {
-	//			MyConstant.LOGGER.info(ex.getMessage());
-	//		}catch(KeyStoreException ex) {
-	//			MyConstant.LOGGER.info(ex.getMessage());
-	//		}catch(Exception ex) {
-	//			MyConstant.LOGGER.info(ex.getMessage());
-	//		}
-	//
-	//		return null;
-	//	}
-
-	//	@Override
-	//	public Object[] getDataParentIca9() {
-	//
-	//		    TrustStrategy acceptingTrustStrategy = (X509Certificate[] chain, String authType) -> true;
-	//try {
-	//		    SSLContext sslContext = org.apache.http.ssl.SSLContexts.custom()
-	//		                    .loadTrustMaterial(null, acceptingTrustStrategy)
-	//		                    .build();
-	//
-	//		    SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext);
-	//
-	//		    CloseableHttpClient httpClient = HttpClients.custom()
-	//		                    .setSSLSocketFactory(csf)
-	//		                    .build();
-	//
-	//		    HttpComponentsClientHttpRequestFactory requestFactory =
-	//		                    new HttpComponentsClientHttpRequestFactory();
-	//
-	//		    requestFactory.setHttpClient(httpClient);
-	//		    RestTemplate restTemplate = new RestTemplate(requestFactory);
-	//
-	//		String url = MyConstant.getPropertyParameter("url");
-	//		String username = MyConstant.getPropertyParameter("username");
-	//		String password = MyConstant.getPropertyParameter("password");
-	//
-	//		MyConstant.LOGGER.info("url : " + url);
-	//
-	//		String plainCreds = username+":"+password;
-	//		byte[] plainCredsBytes = plainCreds.getBytes();
-	//		byte[] base64CredsBytes = Base64.encodeBase64(plainCredsBytes);
-	//		String base64Creds = new String(base64CredsBytes);
-	//
-	//		HttpHeaders headers = new HttpHeaders();
-	//		headers.add("Authorization", "Basic " + base64Creds);
-	//		MyConstant.LOGGER.info("headers value : " + "Basic " + base64Creds);
-	//		HttpEntity<String> entity = new HttpEntity<String>(headers);
-	//
-	//		ResponseEntity<Object[]> respEntity = restTemplate.exchange(url, HttpMethod.GET, entity, Object[].class);
-	//		Object[] objectTab = respEntity.getBody();
-	//
-	//			return objectTab;
-	//		}catch(KeyManagementException ex) {
-	//			MyConstant.LOGGER.info(ex.getMessage());
-	//		}catch(NoSuchAlgorithmException ex) {
-	//			MyConstant.LOGGER.info(ex.getMessage());
-	//		}catch(KeyStoreException ex) {
-	//			MyConstant.LOGGER.info(ex.getMessage());
-	//		}catch(Exception ex) {
-	//			MyConstant.LOGGER.info(ex.getMessage());
-	//		}
-	//
-	//		return null;
-	//	}
-
-
-
 	@Override
 	public void writeIcaCSVFile(Result[] icaResults) {
 
@@ -768,9 +260,6 @@ public class MyService implements MyServiceInterface{
 
 		File outputFile = new File(destination+"ica.csv");
 		try {
-
-//			natixis.drive.entities.Data data = dataParent.getData();
-//			Result[] results = data.getResult();
 
 			ICsvBeanWriter beanWriter = null;
 			CellProcessor[] processors = new CellProcessor[] {
@@ -819,8 +308,5 @@ public class MyService implements MyServiceInterface{
 			MyConstant.LOGGER.info("writeCSVFile para : " + ex.getMessage());
 		}
 	}
-
-
-
 
 }
